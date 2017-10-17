@@ -31,7 +31,8 @@ class ConfigurationsContainer {
       .repository(configuration.repository)
       .command(configuration.command)
       .server(configuration.server)
-      .outputSQLFile(configuration.outputSQLFile)
+      .file(configuration.file)
+      .itemTypes(configuration.itemTypes)
       .options(configuration.options.clone())
       .build()
     configurations << script

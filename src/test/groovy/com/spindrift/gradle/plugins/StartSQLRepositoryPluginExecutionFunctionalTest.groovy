@@ -127,6 +127,71 @@ class StartSQLRepositoryPluginExecutionFunctionalTest extends Specification {
     result.task(":startSQLRepository").outcome == SUCCESS
   }
 
+  def "startSQLRepository task invoked with exportAll option"() {
+    given:
+    buildFile << """
+        plugins {
+          id 'com.spindrift.startsql-repository'
+        }
+
+        startSQLRepository {
+          configurations {
+            parameters {
+              name = 'outputProfileSql'
+              repository = "/atg/userprofiling/ProfileAdapterRepository"
+              command = 'exportAll'
+              modules = ['DCS']
+              file = '/tmp/profile_data_all.xml'
+            }
+          }
+        }
+      """
+
+    when:
+    def result = GradleRunner.create()
+        .withProjectDir(testProjectDir.root)
+        .withArguments('startSQLRepository','-s')
+        .withPluginClasspath()
+        .build()
+
+    then:
+    result.output.contains("ARGS: args = -m DCS -repository /atg/userprofiling/ProfileAdapterRepository -export all /tmp/profile_data_all.xml")
+    result.task(":startSQLRepository").outcome == SUCCESS
+  }
+
+  def "startSQLRepository task invoked with export itemTypes option"() {
+    given:
+    buildFile << """
+        plugins {
+          id 'com.spindrift.startsql-repository'
+        }
+
+        startSQLRepository {
+          configurations {
+            parameters {
+              name = 'outputProfileSql'
+              repository = "/atg/userprofiling/ProfileAdapterRepository"
+              command = 'export'
+              modules = ['DCS']
+              file = '/tmp/profile_data_all.xml'
+              itemTypes = ['user','organization']
+            }
+          }
+        }
+      """
+
+    when:
+    def result = GradleRunner.create()
+        .withProjectDir(testProjectDir.root)
+        .withArguments('startSQLRepository','-s')
+        .withPluginClasspath()
+        .build()
+
+    then:
+    result.output.contains("ARGS: args = -m DCS -repository /atg/userprofiling/ProfileAdapterRepository -export user,organization /tmp/profile_data_all.xml")
+    result.task(":startSQLRepository").outcome == SUCCESS
+  }
+
 
 
 }

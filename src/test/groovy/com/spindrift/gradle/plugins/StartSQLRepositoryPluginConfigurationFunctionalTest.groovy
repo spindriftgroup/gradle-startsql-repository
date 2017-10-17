@@ -57,7 +57,7 @@ class StartSQLRepositoryPluginConfigurationFunctionalTest extends Specification 
 
     then:
     def t = thrown(UnexpectedBuildFailure)
-    t.message.contains("Invalid command specified. Use one of [outputSQL, outputSQLFile, import, export, exportRepositories]")
+    t.message.contains("Invalid command specified. Use one of [outputSQL, outputSQLFile, import, export, exportAll, exportRepositories]")
   }
 
   def "startSQLRepository task invoked with invalid named configuration"() {
@@ -198,7 +198,7 @@ class StartSQLRepositoryPluginConfigurationFunctionalTest extends Specification 
     result.task(":showConfigurations").outcome == SUCCESS
   }
 
-  def "startSQLRepository task invoked with outputSQLFile command where no outputSQLFile name specified"() {
+  def "startSQLRepository task invoked with outputSQLFile command where no file name specified"() {
     given:
     buildFile << """
         plugins {
@@ -224,8 +224,124 @@ class StartSQLRepositoryPluginConfigurationFunctionalTest extends Specification 
 
     then:
     def t = thrown(UnexpectedBuildFailure)
-    t.message.contains("Failed to create a new ScriptConfiguration. Required parameter(s) [outputSQLFile] missing from configuration.")
+    t.message.contains("Failed to create a new ScriptConfiguration. Required parameter(s) [file] missing from configuration.")
   }
 
+  def "startSQLRepository task invoked with import command where no file name specified"() {
+    given:
+    buildFile << """
+        plugins {
+          id 'com.spindrift.startsql-repository'
+        }
+
+        startSQLRepository {
+          configurations {
+            parameters {
+              repository = "/atg/userprofiling/ProfileAdapterRepository"
+              command = 'import'
+            }
+          }
+        }
+      """
+
+    when:
+    def result = GradleRunner.create()
+        .withProjectDir(testProjectDir.root)
+        .withArguments('startSQLRepository', '-s')
+        .withPluginClasspath()
+        .build()
+
+    then:
+    def t = thrown(UnexpectedBuildFailure)
+    t.message.contains("Failed to create a new ScriptConfiguration. Required parameter(s) [file] missing from configuration.")
+  }
+
+    def "startSQLRepository task invoked with export command where no file name specified"() {
+      given:
+      buildFile << """
+        plugins {
+          id 'com.spindrift.startsql-repository'
+        }
+
+        startSQLRepository {
+          configurations {
+            parameters {
+              repository = "/atg/userprofiling/ProfileAdapterRepository"
+              command = 'export'
+            }
+          }
+        }
+      """
+
+      when:
+      def result = GradleRunner.create()
+          .withProjectDir(testProjectDir.root)
+          .withArguments('startSQLRepository', '-s')
+          .withPluginClasspath()
+          .build()
+
+      then:
+      def t = thrown(UnexpectedBuildFailure)
+      t.message.contains("Failed to create a new ScriptConfiguration. Required parameter(s) [file] missing from configuration.")
+    }
+
+  def "startSQLRepository task invoked with exportAll command where no file name specified"() {
+    given:
+    buildFile << """
+        plugins {
+          id 'com.spindrift.startsql-repository'
+        }
+
+        startSQLRepository {
+          configurations {
+            parameters {
+              repository = "/atg/userprofiling/ProfileAdapterRepository"
+              command = 'export'
+            }
+          }
+        }
+      """
+
+    when:
+    def result = GradleRunner.create()
+        .withProjectDir(testProjectDir.root)
+        .withArguments('startSQLRepository', '-s')
+        .withPluginClasspath()
+        .build()
+
+    then:
+    def t = thrown(UnexpectedBuildFailure)
+    t.message.contains("Failed to create a new ScriptConfiguration. Required parameter(s) [file] missing from configuration.")
+  }
+
+  def "startSQLRepository task invoked with export command where item types specified"() {
+    given:
+    buildFile << """
+        plugins {
+          id 'com.spindrift.startsql-repository'
+        }
+
+        startSQLRepository {
+          configurations {
+            parameters {
+              repository = "/atg/userprofiling/ProfileAdapterRepository"
+              command = 'export'
+              file = '/tmp/profile-data-select-type.xml'
+            }
+          }
+        }
+      """
+
+    when:
+    def result = GradleRunner.create()
+        .withProjectDir(testProjectDir.root)
+        .withArguments('startSQLRepository', '-s')
+        .withPluginClasspath()
+        .build()
+
+    then:
+    def t = thrown(UnexpectedBuildFailure)
+    t.message.contains("Failed to create a new ScriptConfiguration. Required parameter(s) [itemTypes] missing from configuration.")
+  }
 
 }

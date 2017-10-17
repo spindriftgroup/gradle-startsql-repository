@@ -24,7 +24,20 @@ import groovy.transform.AutoClone
 @AutoClone
 class Options {
 
+  public static final List<String> DATABASE_OPTIONS = ['oracle','sybase','solid','informix','db2','mysql']
   String database
+  boolean debug = false
+  boolean verboseSQL = false
+  boolean noTransaction = false
+  boolean skipReferences = false
+  String encoding
+  String project
+  String workflow
+  String activity
+  String workspace
+  String comment
+  String user
+
   Map<String, String> options = [:]
 
   void option(String key, String value) {

@@ -36,17 +36,18 @@ class ScriptConfiguration {
   private static String SCRIPT_NAME='startSQLRepository'
   private static String WIN_SCRIPT_NAME="${SCRIPT_NAME}.bat"
   private static String MISSING_DEFAULT_PARAMETERS_ERROR_MSG="Failed to create a new ScriptConfiguration. Default parameter repository or command is missing from configuration."
-  private static final List<String> VALID_COMMANDS=['outputSQL','outputSQLFile','import','export','exportRepositories']
+  private static final List<String> VALID_COMMANDS=['outputSQL','outputSQLFile','import','export','exportAll','exportRepositories']
+  private static final List<String> FILE_BASED_COMMANDS=['outputSQLFile','import','export','exportAll','exportRepositories']
   private static String INVALID_COMMAND_ERROR_MSG="Invalid command specified. Use one of ${VALID_COMMANDS}"
   private static String MISSING_PARAMETERS_ERROR_MSG="Failed to create a new ScriptConfiguration. Required parameter(s) [{0}] missing from configuration."
-  private static String TOO_MANY_PARAMETERS_ERROR_MSG="${MISSING_PARAMETERS_ERROR_MSG}, not both"
 
   String name
   List<String> modules
   String repository
   String command
   String server
-  String outputSQLFile
+  String file
+  List<String> itemTypes
   Options options
 
   String scriptName() {
@@ -62,7 +63,8 @@ class ScriptConfiguration {
     this.repository = (builder?.repository) ? builder.repository : ''
     this.command = (builder?.command) ? builder.command : ''
     this.server = (builder?.server) ? builder.server : ''
-    this.outputSQLFile = (builder?.outputSQLFile) ? builder.outputSQLFile : ''
+    this.file = (builder?.file) ? builder.file : ''
+    this.itemTypes = (builder?.itemTypes) ? builder.itemTypes : []
     this.options = (builder?.options) ?: new Options()
   }
   
@@ -77,7 +79,8 @@ class ScriptConfiguration {
     private String repository
     private String command
     private String server
-    private String outputSQLFile
+    private String file
+    private List<String> itemTypes
     private Options options
 
     public Builder name(String name) {
@@ -100,8 +103,12 @@ class ScriptConfiguration {
       this.server = server
       return this
     }
-    public Builder outputSQLFile(String outputSQLFile) {
-      this.outputSQLFile = outputSQLFile
+    public Builder file(String file) {
+      this.file = file
+      return this
+    }
+    public Builder itemTypes(List<String> itemTypes) {
+      this.itemTypes = itemTypes
       return this
     }
     public Builder options(Options options) {
@@ -127,9 +134,13 @@ class ScriptConfiguration {
       if (!(command in VALID_COMMANDS)) {
         throw new IllegalArgumentException(INVALID_COMMAND_ERROR_MSG+": \n${new ScriptConfiguration(this).toString()}")
       }
-      if (command == "outputSQLFile" && !outputSQLFile) {
+      if (command in FILE_BASED_COMMANDS && !file) {
         throw new IllegalArgumentException(MessageFormat.format(
-          MISSING_PARAMETERS_ERROR_MSG,'outputSQLFile')+": \n${new ScriptConfiguration(this).toString()}")
+          MISSING_PARAMETERS_ERROR_MSG,'file')+": \n${new ScriptConfiguration(this).toString()}")
+      }
+      if (command == 'export' && !itemTypes) {
+        throw new IllegalArgumentException(MessageFormat.format(
+            MISSING_PARAMETERS_ERROR_MSG,'itemTypes')+": \n${new ScriptConfiguration(this).toString()}")
       }
     }
   }
@@ -155,12 +166,23 @@ class ScriptConfiguration {
     parameters << '-repository'
     parameters << repository
 
-    if (outputSQLFile) {
-      parameters << '-outputSQLFile'
-      parameters << outputSQLFile
-    }
-    else {
-      parameters << "-${command}"
+    switch (command) {
+      case 'outputSQLFile':
+      case 'import' :
+        parameters << "-${command}"
+        parameters << "${file}"
+        break
+      case 'exportAll':
+        parameters << "-export"
+        parameters << "all"
+        parameters << "${file}"
+        break
+      case 'export':
+        parameters << "-${command}"
+        parameters << itemTypes.join(',')
+        parameters << "${file}"
+        break
+      default: parameters << "-${command}"
     }
 
     if (options) {
