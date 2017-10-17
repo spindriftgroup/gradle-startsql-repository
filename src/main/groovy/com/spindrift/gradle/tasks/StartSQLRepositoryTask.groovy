@@ -52,7 +52,6 @@ class StartSQLRepositoryTask extends DefaultTask {
   private void executeSingleCommand(String name) {
     validateNamedScript(name)
     project.startSQLRepository.configurations.configurations.find { it.name == name}.each { script ->
-      outputExecutionMessage()
       executeCommand(script)
     }
   }
@@ -64,7 +63,6 @@ class StartSQLRepositoryTask extends DefaultTask {
 
   private void executeMultipleCommands() {
     project.startSQLRepository.configurations.configurations.each { script ->
-      outputExecutionMessage()
       executeCommand(script)
     }
   }
@@ -85,10 +83,6 @@ class StartSQLRepositoryTask extends DefaultTask {
       String errorOutput = "${result.output}\n${result.errorText}"
       throw new GradleException("Script execution failed with code:${result.exitValue}\n${errorOutput}")
     }
-  }
-
-  def outputExecutionMessage() {
-    project.logger.lifecycle "Executing: startSQLRepository"
   }
 
 }

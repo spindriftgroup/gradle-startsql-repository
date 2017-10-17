@@ -29,6 +29,8 @@ import com.spindrift.gradle.os.OSUtils
 
 import groovy.transform.AutoClone
 
+import java.text.MessageFormat
+
 @AutoClone
 class ScriptConfiguration {
   private static String SCRIPT_NAME='startSQLRepository'
@@ -36,13 +38,15 @@ class ScriptConfiguration {
   private static String MISSING_DEFAULT_PARAMETERS_ERROR_MSG="Failed to create a new ScriptConfiguration. Default parameter repository or command is missing from configuration."
   private static final List<String> VALID_COMMANDS=['outputSQL','outputSQLFile','import','export','exportRepositories']
   private static String INVALID_COMMAND_ERROR_MSG="Invalid command specified. Use one of ${VALID_COMMANDS}"
-  private static String MISSING_PARAMETERS_ERROR_MSG="Failed to create a new ScriptConfiguration. Default parameter repository missing from configuration."
+  private static String MISSING_PARAMETERS_ERROR_MSG="Failed to create a new ScriptConfiguration. Required parameter(s) [{0}] missing from configuration."
   private static String TOO_MANY_PARAMETERS_ERROR_MSG="${MISSING_PARAMETERS_ERROR_MSG}, not both"
 
   String name
   List<String> modules
   String repository
   String command
+  String server
+  String outputSQLFile
   Options options
 
   String scriptName() {
@@ -57,6 +61,8 @@ class ScriptConfiguration {
     this.modules = (builder?.modules) ? builder.modules : []
     this.repository = (builder?.repository) ? builder.repository : ''
     this.command = (builder?.command) ? builder.command : ''
+    this.server = (builder?.server) ? builder.server : ''
+    this.outputSQLFile = (builder?.outputSQLFile) ? builder.outputSQLFile : ''
     this.options = (builder?.options) ?: new Options()
   }
   
@@ -70,27 +76,37 @@ class ScriptConfiguration {
     private List<String> modules
     private String repository
     private String command
+    private String server
+    private String outputSQLFile
     private Options options
 
     public Builder name(String name) {
-      this.name = name;
-      return this;
+      this.name = name
+      return this
     }
     public Builder modules(List<String> modules) {
-      this.modules = modules;
-      return this;
+      this.modules = modules
+      return this
     }
     public Builder repository(String repository) {
-      this.repository = repository;
-      return this;
+      this.repository = repository
+      return this
     }
     public Builder command(String command) {
-      this.command = command;
-      return this;
+      this.command = command
+      return this
+    }
+    public Builder server(String server) {
+      this.server = server
+      return this
+    }
+    public Builder outputSQLFile(String outputSQLFile) {
+      this.outputSQLFile = outputSQLFile
+      return this
     }
     public Builder options(Options options) {
       this.options = options;
-      return this;
+      return this
     }
     public ScriptConfiguration build() {
       validate()
@@ -99,12 +115,6 @@ class ScriptConfiguration {
     private validate() {
       validateDefaultParameter()
       validateCommandParameter(command)
-//      if (!workspace && !project) {
-//        throw new IllegalArgumentException(MISSING_PARAMETERS_ERROR_MSG+": \n${new ScriptConfiguration(this).toString()}")
-//      }
-//      if (workspace && project) {
-//        throw new IllegalArgumentException(TOO_MANY_PARAMETERS_ERROR_MSG+": \n${new ScriptConfiguration(this).toString()}")
-//      }
     }
 
     private validateDefaultParameter() {
@@ -116,6 +126,10 @@ class ScriptConfiguration {
     private validateCommandParameter(String command) {
       if (!(command in VALID_COMMANDS)) {
         throw new IllegalArgumentException(INVALID_COMMAND_ERROR_MSG+": \n${new ScriptConfiguration(this).toString()}")
+      }
+      if (command == "outputSQLFile" && !outputSQLFile) {
+        throw new IllegalArgumentException(MessageFormat.format(
+          MISSING_PARAMETERS_ERROR_MSG,'outputSQLFile')+": \n${new ScriptConfiguration(this).toString()}")
       }
     }
   }
@@ -132,10 +146,22 @@ class ScriptConfiguration {
         parameters << it
       }
     }
+
+    if (server) {
+      parameters << '-s'
+      parameters << server
+    }
+
     parameters << '-repository'
     parameters << repository
 
-    parameters << "-${command}"
+    if (outputSQLFile) {
+      parameters << '-outputSQLFile'
+      parameters << outputSQLFile
+    }
+    else {
+      parameters << "-${command}"
+    }
 
     if (options) {
       options.list().each {

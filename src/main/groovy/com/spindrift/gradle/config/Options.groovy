@@ -24,7 +24,6 @@ import groovy.transform.AutoClone
 @AutoClone
 class Options {
 
-  String server
   String database
   Map<String, String> options = [:]
 
@@ -37,10 +36,6 @@ class Options {
    */
   public List<String> list() {
     List opts=[]
-    if (server) {
-      opts << '-s'
-      opts << server
-    }
     if (database) {
       opts << '-database'
       opts << database

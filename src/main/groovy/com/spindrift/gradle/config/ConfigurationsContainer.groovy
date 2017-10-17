@@ -30,6 +30,8 @@ class ConfigurationsContainer {
       .modules(configuration.modules)
       .repository(configuration.repository)
       .command(configuration.command)
+      .server(configuration.server)
+      .outputSQLFile(configuration.outputSQLFile)
       .options(configuration.options.clone())
       .build()
     configurations << script

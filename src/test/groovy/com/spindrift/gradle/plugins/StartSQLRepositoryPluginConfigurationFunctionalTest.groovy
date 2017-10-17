@@ -22,42 +22,13 @@ import org.junit.rules.TemporaryFolder
 import spock.lang.Specification
 import org.gradle.testkit.runner.UnexpectedBuildFailure
 
-class StartSQLRepositoryPluginFunctionalTest extends Specification {
+class StartSQLRepositoryPluginConfigurationFunctionalTest extends Specification {
 
   @Rule final TemporaryFolder testProjectDir = new TemporaryFolder()
   File buildFile
 
   def setup() {
     buildFile = testProjectDir.newFile('build.gradle')
-  }
-
-  def "startSQLRepository task invokes startSQLRepository utility"() {
-    given:
-      buildFile << """
-        plugins {
-          id 'com.spindrift.startsql-repository'
-        }
-        
-        startSQLRepository {
-          configurations {
-            parameters {
-              repository = "/atg/userprofiling/ProfileAdapterRepository"
-              command = 'outputSQL'
-            }
-          }
-        }
-      """
-
-    when:
-    def result = GradleRunner.create()
-        .withProjectDir(testProjectDir.root)
-        .withArguments('startSQLRepository','-s')
-        .withPluginClasspath()
-        .build()
-
-    then:
-    result.output.contains("Executing: startSQLRepository")
-    result.task(":startSQLRepository").outcome == SUCCESS
   }
 
   def "startSQLRepository task invoked with invalid command"() {
@@ -188,38 +159,6 @@ class StartSQLRepositoryPluginFunctionalTest extends Specification {
     t.message.contains("startSQLRepository configuration with [name=outputSomeSql] not found.")
   }
 
-  def "startSQLRepository task invoked with modules option"() {
-    given:
-    buildFile << """
-        plugins {
-          id 'com.spindrift.startsql-repository'
-        }
-
-        startSQLRepository {
-          configurations {
-            parameters {
-              name = 'outputProfileSql'
-              repository = "/atg/userprofiling/ProfileAdapterRepository"
-              command = 'outputSQL'
-              modules = ['DCS']
-            }
-          }
-        }
-      """
-
-    when:
-    def result = GradleRunner.create()
-        .withProjectDir(testProjectDir.root)
-        .withArguments('startSQLRepository','-i','-s')
-        .withPluginClasspath()
-        .build()
-
-    then:
-    result.output.contains("drop table dcs_")
-    result.output.contains("CREATE TABLE dcs_")
-    result.task(":startSQLRepository").outcome == SUCCESS
-  }
-
   def "invoke showConfigurations task with named and un-named configuration"() {
     given:
     buildFile << """
@@ -251,12 +190,41 @@ class StartSQLRepositoryPluginFunctionalTest extends Specification {
         .build()
 
     then:
-    result.output.contains("startSQLRepository configurations") &&
-        result.output.contains("Name: outputProfileSql") &&
-        result.output.contains("Repository: /atg/userprofiling/ProfileAdapterRepository") &&
-        result.output.contains("Modules: [DCS]") &&
-        result.output.contains("UnNamed: 1") &&
+    result.output.contains("startSQLRepository configurations")
+    result.output.contains("Name: outputProfileSql")
+    result.output.contains("Repository: /atg/userprofiling/ProfileAdapterRepository")
+    result.output.contains("Modules: [DCS]")
+    result.output.contains("UnNamed: 1")
     result.task(":showConfigurations").outcome == SUCCESS
+  }
+
+  def "startSQLRepository task invoked with outputSQLFile command where no outputSQLFile name specified"() {
+    given:
+    buildFile << """
+        plugins {
+          id 'com.spindrift.startsql-repository'
+        }
+
+        startSQLRepository {
+          configurations {
+            parameters {
+              repository = "/atg/userprofiling/ProfileAdapterRepository"
+              command = 'outputSQLFile'
+            }
+          }
+        }
+      """
+
+    when:
+    def result = GradleRunner.create()
+        .withProjectDir(testProjectDir.root)
+        .withArguments('startSQLRepository','-s')
+        .withPluginClasspath()
+        .build()
+
+    then:
+    def t = thrown(UnexpectedBuildFailure)
+    t.message.contains("Failed to create a new ScriptConfiguration. Required parameter(s) [outputSQLFile] missing from configuration.")
   }
 
 
