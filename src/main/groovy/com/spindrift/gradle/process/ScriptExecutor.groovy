@@ -32,11 +32,50 @@ class ScriptExecutor implements Executor {
   }
   
   private handleProcessExecution(Process process) {
-    process.waitFor()
-    if (process.exitValue()!=0) {
-      getLogger(LOGGER).error "[ERROR] Script execution failed with code:${process.exitValue()} and script parameters:${scriptConfiguration.commandLine()}"
+    int exitVal
+    try {
+      StreamGobbler errorGobbler = new StreamGobbler(process.getErrorStream(), "ERROR")
+      StreamGobbler outputGobbler = new StreamGobbler(process.getInputStream(), "OUTPUT")
+
+      errorGobbler.start()
+      outputGobbler.start()
+
+      exitVal = process.waitFor();
+      getLogger(LOGGER).debug "ExitValue: $exitVal"
+      if (exitVal != 0) {
+        getLogger(LOGGER).error """[ERROR] Script execution failed with code:${exitVal} 
+          and script parameters:${scriptConfiguration.commandLine()}"""
+      }
+
+    } catch (Throwable t) {
+      t.printStackTrace()
     }
-    new ExecutionResult(exitValue:process.exitValue(), output:process.in.text, errorText:process.err.text)
+
+    new ExecutionResult(exitValue:exitVal, output:process.in.text, errorText:process.err.text)
+  }
+
+
+  class StreamGobbler extends Thread {
+    InputStream is
+    String streamType
+
+    StreamGobbler(InputStream is, String streamType) {
+      this.is = is
+      this.streamType = streamType
+    }
+
+    void run() {
+      try {
+        InputStreamReader isr = new InputStreamReader(is)
+        BufferedReader br = new BufferedReader(isr)
+        String line=null
+        while ((line = br.readLine()) != null)
+          println(line)
+      }
+      catch (IOException ioe) {
+        ioe.printStackTrace()
+      }
+    }
   }
 
 }

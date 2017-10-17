@@ -51,17 +51,14 @@ class StartSQLRepositoryTask extends DefaultTask {
 
   private void executeSingleCommand(String name) {
     validateNamedScript(name)
-    project.startSQLRepository.configurations.configurations.each.filter { it.name == name} { script ->
+    project.startSQLRepository.configurations.configurations.find { it.name == name}.each { script ->
       outputExecutionMessage()
       executeCommand(script)
     }
   }
 
   def validateNamedScript(String name) {
-    boolean valid = false
-    project.startSQLRepository.configurations.configurations.each { script ->
-      valid = (script.name == name)
-    }
+    boolean valid = project.startSQLRepository.configurations.configurations.find { it.name == name}
     if (!valid) throw new InvalidNamedConfigurationException("startSQLRepository configuration with [name=$name] not found.")
   }
 

@@ -27,11 +27,10 @@ class ConfigurationsContainer {
     ConfigureUtil.configure(closure, configuration)
     ScriptConfiguration script = new ScriptConfiguration.Builder()
       .name(configuration.name)
+      .modules(configuration.modules)
       .repository(configuration.repository)
       .command(configuration.command)
-//      .workspace(configuration.workspace)
-//      .project(configuration.project)
-//      .options(configuration.options.clone())
+      .options(configuration.options.clone())
       .build()
     configurations << script
   }

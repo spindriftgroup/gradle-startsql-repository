@@ -30,11 +30,12 @@ Custom Tasks
 
 `startSQLRepository` - Executes all configured startSQLRepository commands
 `startSQLRepository -PconfigName=<name>` - Executes a named startSQLRepository commands
+`showConfigurations` - Shows startSQLRepository named configurations 
 
 Default Configuration
 =====================
 
-- The task name is startSQLRepository and is not modifiable
+- The task names are `startSQLRepository` and `showConfigurations` and are not modifiable
 
 
 Example configuration overrides

@@ -23,10 +23,9 @@ import groovy.transform.AutoClone
 
 @AutoClone
 class Options {
-  
-  List<String> modules
+
   String server
-  String repository
+  String database
   Map<String, String> options = [:]
 
   void option(String key, String value) {
@@ -38,17 +37,13 @@ class Options {
    */
   public List<String> list() {
     List opts=[]
-    if (modules) {
-      opts << '-m'
-      modules.each { opts << it }
-    }
     if (server) {
       opts << '-s'
       opts << server
     }
-    if (repository) {
-      opts << '-repository'
-      opts << repository
+    if (database) {
+      opts << '-database'
+      opts << database
     }
     if (options) {
       options.each { k,v ->

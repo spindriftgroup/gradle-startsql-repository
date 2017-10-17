@@ -15,6 +15,7 @@
  */
 package com.spindrift.gradle.plugins
 
+import com.spindrift.gradle.tasks.ConfigurationDisplayTask
 import com.spindrift.gradle.tasks.StartSQLRepositoryTask
 import org.gradle.api.Plugin
 import org.gradle.api.Project
@@ -31,15 +32,21 @@ class StartSQLRepositoryPlugin implements Plugin<Project> {
 
   static final String PLUGIN_EXTENSION_NAME="startSQLRepository"
   static final String START_SQL_REPOSITORY_TASK="startSQLRepository"
+  static final String SHOW_CONFIGURATIONS_TASK="showConfigurations"
 
   @Override
   void apply(Project project) {
     project.extensions."${PLUGIN_EXTENSION_NAME}" = new StartSQLRepositoryPluginExtension()
     addStartSQLRepositoryTask(project)
+    addShowConfigurationsTask(project)
   }
 
   def addStartSQLRepositoryTask(Project project) {
     project.task(START_SQL_REPOSITORY_TASK, type: StartSQLRepositoryTask )
+  }
+
+  def addShowConfigurationsTask(Project project) {
+    project.task(SHOW_CONFIGURATIONS_TASK, type: ConfigurationDisplayTask)
   }
 
 

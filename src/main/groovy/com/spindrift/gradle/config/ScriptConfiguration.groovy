@@ -40,26 +40,24 @@ class ScriptConfiguration {
   private static String TOO_MANY_PARAMETERS_ERROR_MSG="${MISSING_PARAMETERS_ERROR_MSG}, not both"
 
   String name
+  List<String> modules
   String repository
   String command
-//  String workspace
-//  String project
-//  Options options
+  Options options
 
   String scriptName() {
     (OSUtils.windows) ? WIN_SCRIPT_NAME : SCRIPT_NAME
   }
-//  void options(Closure closure) {
-//    ConfigureUtil.configure(closure, options)
-//  }
+  void options(Closure closure) {
+    ConfigureUtil.configure(closure, options)
+  }
   
   private ScriptConfiguration(Builder builder) {
     this.name = (builder?.name) ? builder.name : ''
+    this.modules = (builder?.modules) ? builder.modules : []
     this.repository = (builder?.repository) ? builder.repository : ''
     this.command = (builder?.command) ? builder.command : ''
-//    this.workspace = (builder?.workspace) ? builder.workspace : ''
-//    this.project = (builder?.project) ? builder.project : ''
-//    this.options = (builder?.options) ?: new Options()
+    this.options = (builder?.options) ?: new Options()
   }
   
   /**
@@ -69,13 +67,17 @@ class ScriptConfiguration {
    */
   public static class Builder {
     private String name
+    private List<String> modules
     private String repository
     private String command
-//    private String workspace
-//    private String project
-//    private Options options
+    private Options options
+
     public Builder name(String name) {
       this.name = name;
+      return this;
+    }
+    public Builder modules(List<String> modules) {
+      this.modules = modules;
       return this;
     }
     public Builder repository(String repository) {
@@ -86,18 +88,10 @@ class ScriptConfiguration {
       this.command = command;
       return this;
     }
-//    public Builder workspace(String workspace) {
-//      this.workspace = workspace;
-//      return this;
-//    }
-//    public Builder project(String project) {
-//      this.project = project;
-//      return this;
-//    }
-//    public Builder options(Options options) {
-//      this.options = options;
-//      return this;
-//    }
+    public Builder options(Options options) {
+      this.options = options;
+      return this;
+    }
     public ScriptConfiguration build() {
       validate()
       return new ScriptConfiguration(this);
@@ -120,8 +114,6 @@ class ScriptConfiguration {
     }
 
     private validateCommandParameter(String command) {
-      println "Is command=$command in ${VALID_COMMANDS}?"
-
       if (!(command in VALID_COMMANDS)) {
         throw new IllegalArgumentException(INVALID_COMMAND_ERROR_MSG+": \n${new ScriptConfiguration(this).toString()}")
       }
@@ -133,27 +125,23 @@ class ScriptConfiguration {
    */
   List<String> parameters() {
     List<String> parameters = []
-    
+
+    if (modules) {
+      modules.each {
+        parameters << '-m'
+        parameters << it
+      }
+    }
     parameters << '-repository'
     parameters << repository
 
     parameters << "-${command}"
 
-//    if (workspace) {
-//      parameters << '-workspace'
-//      parameters << workspace
-//    }
-//    else {
-//      parameters << '-project'
-//      parameters << project
-//    }
-//
-//    if (options) {
-//      options.list().each {
-//        parameters << it
-//      }
-//    }
-    
+    if (options) {
+      options.list().each {
+        parameters << it
+      }
+    }
     parameters
   }
   
