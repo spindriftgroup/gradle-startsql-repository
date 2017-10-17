@@ -32,10 +32,19 @@ Custom Tasks
 - `startSQLRepository -PconfigName=<name>` - Executes a named startSQLRepository commands  
 - `showConfigurations` - Shows startSQLRepository named configurations  
 
+Task Shortcuts
+==============
+
+- `startSQLRepository` - `sSQLR`  
+- `showConfigurations` - `sC` 
+ 
+
 Default Configuration
 =====================
 
 - The task names are `startSQLRepository` and `showConfigurations` and are not modifiable
+- Supported commands are `outputSQL`,`outputSQLFile`,`export`,`exportAll`,`exportRepositories`
+  TODO: `import`
 
 
 Example configuration overrides
@@ -67,6 +76,42 @@ Example configuration overrides
   }
 ```
 
+Example `showConfigurations` task output
+=======================================
+```aidl
+:showConfigurations
+----------------------------------------
+startSQLRepository configurations
+----------------------------------------
+
+name: outputContentSql
+\--- repository: /atg/content/ContentManagementRepository
+\--- command: outputSQL
+\--- modules: [ContentMgmt]
+\--- CLI args: startSQLRepository -m ContentMgmt -repository /atg/content/ContentManagementRepository -outputSQL
+
+name: outputProfileSql
+\--- repository: /atg/userprofiling/ProfileAdapterRepository
+\--- command: outputSQL
+\--- modules: [DCS]
+\--- server: original
+\--- CLI args: startSQLRepository -m DCS -s original -repository /atg/userprofiling/ProfileAdapterRepository -outputSQL
+
+un-named: 2
+\--- repository: /atg/userprofiling/ProfileAdapterRepository
+\--- command: outputSQL
+\--- CLI args: startSQLRepository -repository /atg/userprofiling/ProfileAdapterRepository -outputSQL
+
+name: outputProfileSqlToFile
+\--- repository: /atg/userprofiling/ProfileAdapterRepository
+\--- command: outputSQLFile
+\--- modules: [DCS]
+\--- server: original
+\--- file i-o: /tmp/kak.sql
+\--- CLI args: startSQLRepository -m DCS -s original -repository /atg/userprofiling/ProfileAdapterRepository -outputSQLFile /tmp/kak.sql
+
+```
+
 Build Notes
 ===========
 
@@ -76,6 +121,8 @@ Build Notes
 `gradle clean build -Prelease=true publishPlugins`  
 3. Publishing to Bintray JCenter  
 `gradle clean build -Prelease=true bintrayUpload`  
+
+**_Note_** To run the functional tests a local ATG installation is required with ATG_HOME env parameter set.
 
 Versions
 ========

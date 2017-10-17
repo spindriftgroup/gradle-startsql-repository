@@ -15,6 +15,7 @@
  */
 package com.spindrift.gradle.tasks
 
+import com.spindrift.gradle.config.ScriptConfiguration
 import org.gradle.api.DefaultTask
 import org.gradle.api.tasks.TaskAction
 
@@ -38,16 +39,27 @@ class ConfigurationDisplayTask extends DefaultTask {
     project.startSQLRepository.configurations.configurations.eachWithIndex { script, index ->
       output("")
       if (script.name) {
-        output("Name: ${script.name}")
+        output("name: ${script.name}")
       }
       else {
-        output("UnNamed: ${index}")
+        output("un-named: ${index}")
       }
-      output "${levelTab} Repository: ${script.repository}"
-      output "${levelTab} Command: ${script.command}"
+      output "${levelTab} repository: ${script.repository}"
+      output "${levelTab} command: ${script.command}"
       if (script.modules) {
-        output "${levelTab} Modules: ${script.modules}"
+        output "${levelTab} modules: ${script.modules}"
       }
+      if (script.server) {
+        output "${levelTab} server: ${script.server}"
+      }
+      if (script.file) {
+        output "${levelTab} file i-o: ${script.file}"
+      }
+      if (script.itemTypes) {
+        output "${levelTab} item-types: ${script.itemTypes}"
+      }
+      ScriptConfiguration scriptConfiguration = script
+      output("${levelTab} CLI args: ${scriptConfiguration.commandLine().join(' ')}")
     }
   }
 

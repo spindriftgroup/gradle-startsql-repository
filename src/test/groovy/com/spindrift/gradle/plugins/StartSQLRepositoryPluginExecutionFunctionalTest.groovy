@@ -192,6 +192,36 @@ class StartSQLRepositoryPluginExecutionFunctionalTest extends Specification {
     result.task(":startSQLRepository").outcome == SUCCESS
   }
 
+  def "startSQLRepository task invoked with exportRepositories option"() {
+    given:
+    buildFile << """
+        plugins {
+          id 'com.spindrift.startsql-repository'
+        }
+
+        startSQLRepository {
+          configurations {
+            parameters {
+              repositories = ['/atg/userprofiling/ProfileAdapterRepository','/atg/content/ContentManagementRepository']
+              command = 'exportRepositories'
+              modules = ['DCS']
+              file = '/tmp/multi_repo_data.xml'
+            }
+          }
+        }
+      """
+
+    when:
+    def result = GradleRunner.create()
+        .withProjectDir(testProjectDir.root)
+        .withArguments('startSQLRepository','-s')
+        .withPluginClasspath()
+        .build()
+
+    then:
+    result.output.contains("ARGS: args = -m DCS -exportRepositories /atg/userprofiling/ProfileAdapterRepository,/atg/content/ContentManagementRepository /tmp/multi_repo_data.xml")
+    result.task(":startSQLRepository").outcome == SUCCESS
+  }
 
 
 }

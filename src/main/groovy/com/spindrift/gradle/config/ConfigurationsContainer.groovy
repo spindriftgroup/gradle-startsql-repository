@@ -33,6 +33,7 @@ class ConfigurationsContainer {
       .server(configuration.server)
       .file(configuration.file)
       .itemTypes(configuration.itemTypes)
+      .repositories(configuration.repositories)
       .options(configuration.options.clone())
       .build()
     configurations << script

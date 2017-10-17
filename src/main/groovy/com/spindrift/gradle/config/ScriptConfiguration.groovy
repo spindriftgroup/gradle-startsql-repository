@@ -48,6 +48,7 @@ class ScriptConfiguration {
   String server
   String file
   List<String> itemTypes
+  List<String> repositories
   Options options
 
   String scriptName() {
@@ -65,6 +66,7 @@ class ScriptConfiguration {
     this.server = (builder?.server) ? builder.server : ''
     this.file = (builder?.file) ? builder.file : ''
     this.itemTypes = (builder?.itemTypes) ? builder.itemTypes : []
+    this.repositories = (builder?.repositories) ? builder.repositories : []
     this.options = (builder?.options) ?: new Options()
   }
   
@@ -81,6 +83,7 @@ class ScriptConfiguration {
     private String server
     private String file
     private List<String> itemTypes
+    private List<String> repositories
     private Options options
 
     public Builder name(String name) {
@@ -111,6 +114,10 @@ class ScriptConfiguration {
       this.itemTypes = itemTypes
       return this
     }
+    public Builder repositories(List<String> repositories) {
+      this.repositories = repositories
+      return this
+    }
     public Builder options(Options options) {
       this.options = options;
       return this
@@ -125,7 +132,7 @@ class ScriptConfiguration {
     }
 
     private validateDefaultParameter() {
-      if (!repository || !command) {
+      if (!command || (!repository && command != 'exportRepositories')) {
         throw new IllegalArgumentException(MISSING_DEFAULT_PARAMETERS_ERROR_MSG+": \n${new ScriptConfiguration(this).toString()}")
       }
     }
@@ -141,6 +148,10 @@ class ScriptConfiguration {
       if (command == 'export' && !itemTypes) {
         throw new IllegalArgumentException(MessageFormat.format(
             MISSING_PARAMETERS_ERROR_MSG,'itemTypes')+": \n${new ScriptConfiguration(this).toString()}")
+      }
+      if (command == 'exportRepositories' && !repositories) {
+        throw new IllegalArgumentException(MessageFormat.format(
+            MISSING_PARAMETERS_ERROR_MSG,'repositories')+": \n${new ScriptConfiguration(this).toString()}")
       }
     }
   }
@@ -163,8 +174,10 @@ class ScriptConfiguration {
       parameters << server
     }
 
-    parameters << '-repository'
-    parameters << repository
+    if (command != 'exportRepositories') {
+      parameters << '-repository'
+      parameters << repository
+    }
 
     switch (command) {
       case 'outputSQLFile':
@@ -180,6 +193,11 @@ class ScriptConfiguration {
       case 'export':
         parameters << "-${command}"
         parameters << itemTypes.join(',')
+        parameters << "${file}"
+        break
+      case 'exportRepositories':
+        parameters << "-${command}"
+        parameters << repositories.join(',')
         parameters << "${file}"
         break
       default: parameters << "-${command}"
