@@ -28,9 +28,9 @@ apply plugin: "com.spindrift.startsql-repository"
 Custom Tasks
 ============
 
-`startSQLRepository` - Executes all configured startSQLRepository commands
-`startSQLRepository -PconfigName=<name>` - Executes a named startSQLRepository commands
-`showConfigurations` - Shows startSQLRepository named configurations 
+- `startSQLRepository` - Executes all configured startSQLRepository commands  
+- `startSQLRepository -PconfigName=<name>` - Executes a named startSQLRepository commands  
+- `showConfigurations` - Shows startSQLRepository named configurations  
 
 Default Configuration
 =====================
