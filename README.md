@@ -7,6 +7,13 @@ Work in Progress
 
 *********  **THIS REPO IS NOT COMPLETE OR RELEASED YET** ************
 
+Pre-Requisites
+==============
+
+- Oracle Commerce (ATG) installation - For build, test and execution  
+- ATG_HOME environment variable set  
+- A localconfig or server module pre-configured with relevant datasource details for import/export
+
 Usage
 =====
 Build script snippet for use in all Gradle versions
@@ -37,15 +44,14 @@ Task Shortcuts
 
 - `startSQLRepository` - `sSQLR`  
 - `showConfigurations` - `sC` 
- 
 
 Default Configuration
 =====================
 
-- The task names are `startSQLRepository` and `showConfigurations` and are not modifiable
-- Supported commands are `outputSQL`,`outputSQLFile`,`export`,`exportAll`,`exportRepositories`
-  TODO: `import`
-
+- The task names are `startSQLRepository` and `showConfigurations` and are not modifiable  
+- Supported commands are `outputSQL`,`outputSQLFile`,`export`,`exportAll`,`exportRepositories`  
+- Most optional configuration is done in a sub-closure `options {}`.  
+- There is basic validation on certain command an option configuration. Any other is delegated to the utility itself.  
 
 Example configuration overrides
 ===============================
@@ -54,7 +60,6 @@ Example configuration overrides
   startSQLRepository {
     configurations {
       parameters {
-        name = 'outputProfileSql'
         repository = "/atg/userprofiling/ProfileAdapterRepository"
         command = 'outputSQL'
       }
@@ -63,14 +68,75 @@ Example configuration overrides
         repository = "/atg/commerce/catalog/ProductCatalog"
         modules = ['DCS','MyModule']
         command = 'outputSQLFile'
-        outputFile = 'catalog.sql'
+        file = 'catalog.sql'
       }
       parameters {
-        name = 'exportSiteData'
-        repository = "/atg/multisite/SiteRepository"
+        name = 'exportMultiRepoData'
+        repositories = ["/atg/multisite/SiteRepository","/atg/commerce/catalog/ProductCatalog"]
+        command = 'exportRepositories'
+        modules = ['MyModule']
+        file = 'multi-repo-data.xml'
+      }
+      parameters {
+        name = 'exportCatalogTypes'
+        repository = "/atg/commerce/catalog/ProductCatalog"
         command = 'export'
         modules = ['MyModule']
-        outputFile = 'site-data.xml'
+        itemTypes= ['category','product','sku']
+        file = 'catalog-type-data.xml'
+      }
+      parameters {
+        name = 'exportAllCatalogData'
+        repository = "/atg/commerce/catalog/ProductCatalog"
+        command = 'exportAll'
+        modules = ['MyModule']
+        file = 'catalog-all-data.xml'
+        options {
+          database = 'oracle'
+          noTransaction true
+          debug true
+          skipReferences true
+        }
+      }
+      parameters {
+        name = 'importAllCatalogData'
+        repository = "/atg/commerce/catalog/ProductCatalog"
+        command = 'import'
+        modules = ['MyModule']
+        file = 'catalog-all-data.xml'
+        options {
+          database = 'oracle'
+          noTransaction true
+          debug true
+          skipReferences true
+        }
+      }
+      parameters {
+        name = 'importCatalogVersionedData'
+        repository = "/atg/commerce/catalog/ProductCatalog"
+        server = 'MyServer'
+        command = 'import'
+        modules = ['MyModule']
+        file = 'catalog-versioned-data.xml'
+        options {
+          workspace 'ImportInitialCatalogData'
+          user 'myName'
+          comment 'Initial catalog import'
+        }
+      }
+      parameters {
+        name = 'importCatalogVersionedData'
+        repository = "/atg/commerce/catalog/ProductCatalog"
+        server = 'MyServer'
+        command = 'import'
+        modules = ['MyModule']
+        file = 'catalog-versioned-data.xml'
+        options {
+          project 'ImportCatalogData'
+          user 'myName'
+          comment 'Some other catalog import'
+          workflow 'myCustomWorkflow'
+        }
       }
     }
   }
