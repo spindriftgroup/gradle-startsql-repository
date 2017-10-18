@@ -1,12 +1,6 @@
 # gradle-startsql-repository
 Gradle wrapper plugin for Oracle Commerce (ATG) startSQLRepository utility
 
-
-Work in Progress
-================
-
-*********  **THIS REPO IS NOT COMPLETE OR RELEASED YET** ************
-
 Pre-Requisites
 ==============
 
