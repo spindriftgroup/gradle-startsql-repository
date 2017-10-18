@@ -15,22 +15,22 @@
  */
 package com.spindrift.gradle.config
 
-class InvalidNamedConfigurationException extends RuntimeException {
+class InvalidConfigurationException extends RuntimeException {
   /**
-   * Constructs an <code>InvalidNamedConfigurationException</code> with no
+   * Constructs an <code>InvalidConfigurationException</code> with no
    * detail message.
    */
-  public InvalidNamedConfigurationException() {
+  public InvalidConfigurationException() {
     super();
   }
 
   /**
-   * Constructs an <code>InvalidNamedConfigurationException</code> with the
+   * Constructs an <code>InvalidConfigurationException</code> with the
    * specified detail message.
    *
    * @param   s   the detail message.
    */
-  public InvalidNamedConfigurationException(String s) {
+  public InvalidConfigurationException(String s) {
     super(s);
   }
 }

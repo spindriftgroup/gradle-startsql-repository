@@ -408,4 +408,176 @@ class StartSQLRepositoryPluginConfigurationFunctionalTest extends Specification 
     t.message.contains("Failed to create a new ScriptConfiguration. Required parameter(s) [repositories] missing from configuration.")
   }
 
+  def "startSQLRepository task invoked with invalid extra options"() {
+    given:
+    buildFile << """
+        plugins {
+          id 'com.spindrift.startsql-repository'
+        }
+
+        startSQLRepository {
+          configurations {
+            parameters {
+              name = 'outputProfileSQL'
+              repository = "/atg/userprofiling/ProfileAdapterRepository"
+              command = 'outputSQL'
+              options {
+                invalid = 'value'
+              }
+            }
+          }
+        }
+      """
+
+    when:
+    def result = GradleRunner.create()
+        .withProjectDir(testProjectDir.root)
+        .withArguments('startSQLRepository','-s')
+        .withPluginClasspath()
+        .build()
+
+    then:
+    def t = thrown(UnexpectedBuildFailure)
+    t.message.contains("Could not set unknown property 'invalid' for object of type com.spindrift.gradle.config.Options.")
+  }
+
+  def "startSQLRepository task invoked with invalid database option"() {
+    given:
+    buildFile << """
+        plugins {
+          id 'com.spindrift.startsql-repository'
+        }
+
+        startSQLRepository {
+          configurations {
+            parameters {
+              name = 'outputProfileSQL'
+              repository = "/atg/userprofiling/ProfileAdapterRepository"
+              command = 'outputSQL'
+              options {
+                database = 'aurora'
+              }
+            }
+          }
+        }
+      """
+
+    when:
+    def result = GradleRunner.create()
+        .withProjectDir(testProjectDir.root)
+        .withArguments('startSQLRepository','-s')
+        .withPluginClasspath()
+        .build()
+
+    then:
+    def t = thrown(UnexpectedBuildFailure)
+    t.message.contains("The option value for [database=aurora] must be one of [oracle, sybase, solid, informix, db2, mysql].")
+  }
+
+  def "startSQLRepository task invoked with import options when command is not import"() {
+    given:
+    buildFile << """
+        plugins {
+          id 'com.spindrift.startsql-repository'
+        }
+
+        startSQLRepository {
+          configurations {
+            parameters {
+              name = 'outputProfileSQL'
+              repository = "/atg/userprofiling/ProfileAdapterRepository"
+              command = 'outputSQL'
+              file = 'profile_data.xml'
+              options {
+                project = 'myproject'
+                user = 'me'
+              }
+            }
+          }
+        }
+      """
+
+    when:
+    def result = GradleRunner.create()
+        .withProjectDir(testProjectDir.root)
+        .withArguments('startSQLRepository','-s')
+        .withPluginClasspath()
+        .build()
+
+    then:
+    def t = thrown(UnexpectedBuildFailure)
+    def m = "The option values [workflow, activity, project, workspace, user, comment] " +
+        "can only be used with the import command. " +
+        "The [command=outputSQL] is invalid in this configuration."
+    t.message.contains(m)
+  }
+
+  def "startSQLRepository task invoked with import requires user option if project is specified"() {
+    given:
+    buildFile << """
+        plugins {
+          id 'com.spindrift.startsql-repository'
+        }
+
+        startSQLRepository {
+          configurations {
+            parameters {
+              name = 'outputProfileSQL'
+              repository = "/atg/userprofiling/ProfileAdapterRepository"
+              command = 'import'
+              file = 'profile_data.xml'
+              options {
+                project = 'myproject'
+              }
+            }
+          }
+        }
+      """
+
+    when:
+    def result = GradleRunner.create()
+        .withProjectDir(testProjectDir.root)
+        .withArguments('startSQLRepository','-s')
+        .withPluginClasspath()
+        .build()
+
+    then:
+    def t = thrown(UnexpectedBuildFailure)
+    t.message.contains("The option value [user=<username>] is required if the project option is specified.")
+  }
+
+  def "startSQLRepository task invoked with non-export command skipReferences option invalidly specified"() {
+    given:
+    buildFile << """
+        plugins {
+          id 'com.spindrift.startsql-repository'
+        }
+
+        startSQLRepository {
+          configurations {
+            parameters {
+              name = 'outputProfileSQL'
+              repository = "/atg/userprofiling/ProfileAdapterRepository"
+              command = 'import'
+              file = 'profile_data.xml'
+              options {
+                skipReferences true
+              }
+            }
+          }
+        }
+      """
+
+    when:
+    def result = GradleRunner.create()
+        .withProjectDir(testProjectDir.root)
+        .withArguments('startSQLRepository','-s')
+        .withPluginClasspath()
+        .build()
+
+    then:
+    def t = thrown(UnexpectedBuildFailure)
+    t.message.contains("The option value [skipReferences] is only valid for "
+        .concat("[export, exportAll, exportRepositories] commands."))
+  }
 }

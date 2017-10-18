@@ -19,7 +19,7 @@ import com.spindrift.gradle.config.ScriptConfiguration
 import com.spindrift.gradle.process.ExecutionResult
 import com.spindrift.gradle.process.Executor
 import com.spindrift.gradle.process.ScriptExecutor
-import com.spindrift.gradle.config.InvalidNamedConfigurationException
+import com.spindrift.gradle.config.InvalidConfigurationException
 
 import org.gradle.api.DefaultTask
 import org.gradle.api.tasks.TaskAction
@@ -58,7 +58,7 @@ class StartSQLRepositoryTask extends DefaultTask {
 
   def validateNamedScript(String name) {
     boolean valid = project.startSQLRepository.configurations.configurations.find { it.name == name}
-    if (!valid) throw new InvalidNamedConfigurationException("startSQLRepository configuration with [name=$name] not found.")
+    if (!valid) throw new InvalidConfigurationException("startSQLRepository configuration with [name=$name] not found.")
   }
 
   private void executeMultipleCommands() {

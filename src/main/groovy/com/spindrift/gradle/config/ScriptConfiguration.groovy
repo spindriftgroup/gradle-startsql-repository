@@ -37,6 +37,7 @@ class ScriptConfiguration {
   private static String WIN_SCRIPT_NAME="${SCRIPT_NAME}.bat"
   private static String MISSING_DEFAULT_PARAMETERS_ERROR_MSG="Failed to create a new ScriptConfiguration. Default parameter repository or command is missing from configuration."
   private static final List<String> VALID_COMMANDS=['outputSQL','outputSQLFile','import','export','exportAll','exportRepositories']
+  private static final List<String> VALID_EXPORT_COMMANDS=['export','exportAll','exportRepositories']
   private static final List<String> FILE_BASED_COMMANDS=['outputSQLFile','import','export','exportAll','exportRepositories']
   private static String INVALID_COMMAND_ERROR_MSG="Invalid command specified. Use one of ${VALID_COMMANDS}"
   private static String MISSING_PARAMETERS_ERROR_MSG="Failed to create a new ScriptConfiguration. Required parameter(s) [{0}] missing from configuration."
@@ -129,6 +130,8 @@ class ScriptConfiguration {
     private validate() {
       validateDefaultParameter()
       validateCommandParameter(command)
+      options.validate()
+      options.validateForCommand(command)
     }
 
     private validateDefaultParameter() {

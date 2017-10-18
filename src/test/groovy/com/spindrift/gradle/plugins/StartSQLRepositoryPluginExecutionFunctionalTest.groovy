@@ -223,5 +223,42 @@ class StartSQLRepositoryPluginExecutionFunctionalTest extends Specification {
     result.task(":startSQLRepository").outcome == SUCCESS
   }
 
+  def "startSQLRepository task invoked with options"() {
+    given:
+    buildFile << """
+        plugins {
+          id 'com.spindrift.startsql-repository'
+        }
+
+        startSQLRepository {
+          configurations {
+            parameters {
+              repository = '/atg/userprofiling/ProfileAdapterRepository'
+              command = 'outputSQLFile'
+              file = '/tmp/profile_data.xml'
+              modules = ['DCS']
+              options {
+                database = 'oracle'
+                debug true
+                verboseSQL true
+                encoding = 'UTF-8'
+              }
+            }
+          }
+        }
+      """
+
+    when:
+    def result = GradleRunner.create()
+        .withProjectDir(testProjectDir.root)
+        .withArguments('startSQLRepository','-s')
+        .withPluginClasspath()
+        .build()
+
+    then:
+    result.output.contains("ARGS: args = -m DCS -repository /atg/userprofiling/ProfileAdapterRepository -outputSQLFile /tmp/profile_data.xml -database oracle -debug -verboseSQL -encoding UTF-8")
+    result.task(":startSQLRepository").outcome == SUCCESS
+  }
+
 
 }
